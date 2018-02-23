@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+require_relative '../lib/axechange'
+require 'logger'
+
+$LOG = Logger.new(STDOUT)
+$LOG.level = Logger::DEBUG
+
+aed = AxeChangeDownloader.new('preset', $LOG)
+
+loop do
+  aed.download
+  sleep(5)
+end

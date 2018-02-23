@@ -1,0 +1,21 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    climate_control (0.2.0)
+    coderay (1.1.2)
+    method_source (0.9.0)
+    pry (0.11.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    terrapin (0.6.0)
+      climate_control (>= 0.0.3, < 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pry!
+  terrapin!
+
+BUNDLED WITH
+   1.16.0
