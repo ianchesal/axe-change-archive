@@ -4,12 +4,13 @@ require 'terrapin'
 require 'yaml'
 
 class AxeChangeDownloader
-  attr_accessor :config, :logger, :cmd, :type
+  attr_accessor :config, :logger, :cmd, :type, :failure_limit
 
-  def initialize(type, logger)
+  def initialize(type, logger, failure_limit: 1000)
     @logger = logger
     @type = type
     @config = YAML.load_file(__config_file)
+    @failure_limit = failure_limit
     Terrapin::CommandLine.logger = logger
   end
 
@@ -17,16 +18,24 @@ class AxeChangeDownloader
     Dir.chdir(__output_directory) do
       __curl(download_url)
     end
-    self.config[type] += 1
+    config[type] += 1
     save_config
   end
 
   def download_url
+    raise "Failure limit reach" if self.failure_limit < 0
+
     response = Net::HTTP.get_response(URI.parse(__metadata_url))
 
     logger.debug "response code: #{response.code}"
 
-    raise "I don't know what to do with #{response}" unless response.kind_of?(Net::HTTPRedirection)
+    unless response.kind_of?(Net::HTTPRedirection)
+      logger.debug "I don't know what to do with #{response}"
+      logger.debug "Incrementing index and trying again..."
+      self.failure_limit -= 1
+      self.config[type] += 1
+      return download_url
+    end
 
     url = __base_url + redirect_url(response)
     logger.debug "download url: #{url}"
